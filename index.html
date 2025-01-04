@@ -1,0 +1,532 @@
+<html><head><base href="https://thinkgpt.davegpt.com"></head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Chat Assistant</title>
+<style>
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background: #f0f2f5;
+  color: #1a1a1a;
+}
+
+.chat-container {
+  max-width: 800px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  padding: 24px;
+  margin-top: 20px;
+}
+
+.chat-header {
+  text-align: center;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 24px;
+}
+
+.chat-header h1 {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.chat-header p {
+  color: #666;
+  font-size: 16px;
+}
+
+.settings-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: #ffffff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: all 0.2s;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  color: #000000;
+}
+
+.settings-btn:hover {
+  background: #f5f5f5;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+}
+
+.settings-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+}
+
+.modal-content {
+  position: relative;
+  background: white;
+  width: 90%;
+  max-width: 500px;
+  margin: 50px auto;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  color: #000000;
+}
+
+.chat-messages {
+  height: 400px;
+  overflow-y: auto;
+  padding: 20px 0;
+}
+
+.message {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.message.user {
+  flex-direction: row-reverse;
+}
+
+.message-content {
+  max-width: 70%;
+  padding: 12px 16px;
+  border-radius: 16px;
+  position: relative;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.user .message-content {
+  background: #0084ff;
+  color: white;
+}
+
+.bot .message-content {
+  background: #f0f0f0;
+}
+
+.input-area {
+  display: flex;
+  gap: 10px;
+  padding-top: 24px;
+  margin-top: 24px;
+  border-top: 1px solid #eee;
+}
+
+input {
+  flex: 1;
+  font-size: 15px;
+  padding: 14px 20px;
+  border: 1px solid #ddd;
+  border-radius: 24px;
+  outline: none;
+}
+
+button {
+  padding: 14px 28px;
+  background: #0084ff;
+  color: white;
+  border: none;
+  border-radius: 24px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.2s;
+  font-weight: 500;
+}
+
+button:hover {
+  background: #0073e6;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.typing-indicator {
+  display: flex;
+  gap: 4px;
+  padding: 8px 12px;
+  background: #f0f0f0;
+  border-radius: 12px;
+  width: fit-content;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  background: #666;
+  border-radius: 50%;
+  animation: typing 1s infinite;
+}
+
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-group label {
+  font-weight: 500;
+  color: #000000; 
+}
+
+.form-group select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #fff;
+  transition: border-color 0.2s;
+  color: #000000;
+}
+
+.form-group select:focus {
+  border-color: #0084ff;
+  outline: none;
+}
+
+.language-select {
+  margin-bottom: 15px;
+}
+
+#clear-history-button {
+  width: 100%;
+  margin-top: 10px;
+  background: #ff4444;
+}
+
+#clear-history-button:hover {
+  background: #cc0000;
+}
+
+.footer {
+  text-align: center;
+  margin-top: 20px;
+  padding: 20px;
+  color: #666;
+}
+
+.footer a {
+  color: #0000009f;
+  text-decoration: none;
+  margin: 0 10px;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+h2#settings-title {
+  color: #000000;
+}
+</style>
+
+<div class="chat-container">
+  <button class="settings-btn" onclick="openSettings()">&#x2699;&#xfe0f; <span id="settings-text">&#x8bbe;&#x7f6e;</span></button>
+  
+  <div class="chat-header">
+    <h1 id="main-title">AI &#x804a;&#x5929;&#x52a9;&#x624b;</h1>
+    <p id="subtitle">&#x514d;&#x8d39;&#x65e0;&#x9650;&#x5bf9;&#x8bdd; &#xb7; 24&#x5c0f;&#x65f6;&#x5728;&#x7ebf;</p>
+  </div>
+  
+  <div class="chat-messages" id="chat-messages">
+    <div class="message bot">
+      <div class="message-content" id="welcome-message">
+        &#x4f60;&#x597d;!&#x6211;&#x662f;AI&#x52a9;&#x624b;,&#x5f88;&#x9ad8;&#x5174;&#x4e3a;&#x4f60;&#x670d;&#x52a1;&#x3002;&#x4f60;&#x53ef;&#x4ee5;&#x95ee;&#x6211;&#x4efb;&#x4f55;&#x95ee;&#x9898;,&#x8ba9;&#x6211;&#x4eec;&#x5f00;&#x59cb;&#x6109;&#x5feb;&#x7684;&#x5bf9;&#x8bdd;&#x5427;!
+      </div>
+    </div>
+  </div>
+
+  <div class="input-area">
+    <input type="text" id="user-input" placeholder="&#x8f93;&#x5165;&#x4f60;&#x60f3;&#x95ee;&#x7684;&#x95ee;&#x9898;..." onkeypress="handleKeyPress(event)">
+    <button onclick="sendMessage()" id="send-button">&#x53d1;&#x9001;</button>
+  </div>
+</div>
+
+<div class="settings-modal" id="settings-modal">
+  <div class="modal-content">
+    <h2 id="settings-title">&#x8bbe;&#x7f6e;</h2>
+    <div class="settings-form">
+      <div class="form-group language-select">
+        <label id="language-label">&#x8bed;&#x8a00;&#x8bbe;&#x7f6e;&#xff1a;</label>
+        <select id="language-select" onchange="changeLanguage()">
+          <option value="zh">&#x4e2d;&#x6587;</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label id="model-label">&#x9009;&#x62e9;AI&#x6a21;&#x578b;&#xff1a;</label>
+        <select id="ai-model">
+          <option value="kimi">Kimi1</option>
+          <option value="kimi2">Kimi2</option>
+          <option value="kimi3">Kimi3</option>
+          <option value="kimi4">Kimi4</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <button onclick="clearHistory()" id="clear-history-button">&#x5220;&#x9664;AI&#x5bf9;&#x8bdd;&#x8bb0;&#x5fc6;&#x4e0e;&#x5386;&#x53f2;&#x8bb0;&#x5f55;</button>
+      </div>
+    </div>
+    <div style="display: flex; gap: 10px; justify-content: flex-end">
+      <button onclick="saveSettings()" id="save-button">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <a href="https://li2012China.github.io/">li2012China</a>
+  <a href="https://github.com/li2012China/AI-Chat">&#x5982;&#x4f55;&#x8fd0;&#x4f5c;</a>
+</div>
+
+<script>let selectedModel = localStorage.getItem('aiModel') || 'kimi';
+let currentLanguage = localStorage.getItem('language') || 'zh';
+const translations = {
+  zh: {
+    title: 'AI 智能助手',
+    subtitle: '免费无限对话 · 智能交互 · 24小时在线',
+    welcome: '你好！我是AI智能助手，很高兴为你服务。你可以问我任何问题，让我们开始愉快的对话吧！',
+    settings: '设置选项',
+    languageSelect: '界面语言：',
+    modelSelect: '选择AI模型：',
+    inputPlaceholder: '请输入你的问题...',
+    sendButton: '发送消息',
+    saveButton: '保存设置',
+    clearHistory: '清空对话历史',
+    settingsBtn: '设置',
+    footer: {
+      howItWorks: '如何运作'
+    }
+  },
+  en: {
+    title: 'AI Smart Assistant',
+    subtitle: 'Free Unlimited Chat · Smart Interaction · 24/7 Online',
+    welcome: 'Hello! I\'m your AI assistant. I\'m here to help with any questions you might have!',
+    settings: 'Settings',
+    languageSelect: 'Interface Language:',
+    modelSelect: 'Select AI Model:',
+    inputPlaceholder: 'Type your question...',
+    sendButton: 'Send',
+    saveButton: 'Save Settings',
+    clearHistory: 'Clear Chat History',
+    settingsBtn: 'Settings',
+    footer: {
+      howItWorks: 'How it Works'
+    }
+  }
+};
+async function queryAI(message) {
+  try {
+    let apiUrl;
+    let headers = {
+      'Content-Type': 'application/json'
+    };
+    let body;
+    switch (selectedModel) {
+      case 'kimi':
+      case 'kimi2':
+      case 'kimi3':
+      case 'kimi4':
+        apiUrl = 'https://api.moonshot.cn/v1/chat/completions';
+        headers['Authorization'] = `Bearer ${selectedModel === 'kimi' ? 'sk-4syqc7NKLEhlTmKTif9KIupDxgiMlycGQq4noOpjmjEfsW0R' : selectedModel === 'kimi2' ? 'sk-WKGe6syo44CNlMgVI1UVEZ4y6TzRy8ct39lONtwx4V4KtKxU' : selectedModel === 'kimi3' ? 'sk-NzTfJmAW3NIqO5SkYpeXPiBLcCXEQ0rpmuqq6iYmGTzAi1cj' : 'sk-6qe0ZmoNoVoqFWl6KAcYuASOeNmsqEhmd9kfiTk08sjLueCZ'}`;
+        body = JSON.stringify({
+          model: "moonshot-v1-8k",
+          messages: [...conversationHistory, {
+            role: "user",
+            content: message
+          }]
+        });
+        break;
+      default:
+        throw new Error('Invalid model selected');
+    }
+    console.log('Using API URL:', apiUrl);
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: headers,
+      body: body
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Response:', errorText);
+      throw new Error(`HTTP error! status: ${response.status}, response: ${errorText}`);
+    }
+    const data = await response.json();
+    console.log('API Response data:', data);
+    switch (selectedModel) {
+      case 'kimi':
+      case 'kimi2':
+      case 'kimi3':
+      case 'kimi4':
+        return data.choices[0].message.content;
+      default:
+        throw new Error('Invalid model selected');
+    }
+  } catch (error) {
+    console.error('Detailed API Error:', error);
+    if (error.message.includes('API key')) {
+      return currentLanguage === 'zh' ? "API密钥无效或已过期，请联系管理员更新API密钥。" : "API key is invalid or expired. Please contact administrator to update the API key.";
+    } else if (error.message.includes('Rate limit')) {
+      return currentLanguage === 'zh' ? "请求太频繁，请稍后再试。" : "Too many requests. Please try again later.";
+    } else if (error.message.includes('network')) {
+      return currentLanguage === 'zh' ? "网络连接错误，请检查您的网络设置。" : "Network error. Please check your internet connection.";
+    }
+    return currentLanguage === 'zh' ? `抱歉，服务暂时不可用。错误详情: ${error.message}` : `Sorry, service is temporarily unavailable. Error details: ${error.message}`;
+  }
+}
+function openSettings() {
+  document.getElementById('settings-modal').style.display = 'block';
+  document.getElementById('ai-model').value = selectedModel;
+  conversationHistory = [];
+}
+function closeSettings() {
+  document.getElementById('settings-modal').style.display = 'none';
+}
+function saveSettings() {
+  selectedModel = document.getElementById('ai-model').value;
+  localStorage.setItem('aiModel', selectedModel);
+  closeSettings();
+}
+let isTyping = false;
+function handleKeyPress(e) {
+  if (e.key === "Enter") {
+    sendMessage();
+  }
+}
+async function sendMessage() {
+  const input = document.getElementById("user-input");
+  const message = input.value.trim();
+  const now = Date.now();
+  if (now - lastMessageTime < 5000) {
+    alert(currentLanguage === 'zh' ? '请等待5秒后再发送消息' : 'Please wait 5 seconds before sending another message');
+    return;
+  }
+  if (message && !isTyping) {
+    lastMessageTime = now;
+    addMessage(message, "user");
+    input.value = "";
+    isTyping = true;
+    showTypingIndicator();
+    conversationHistory.push({
+      role: "user",
+      content: message
+    });
+    try {
+      const response = await queryAI(message);
+      removeTypingIndicator();
+      addMessage(response, "bot");
+      conversationHistory.push({
+        role: "assistant",
+        content: response
+      });
+      if (conversationHistory.length > 20) {
+        conversationHistory = conversationHistory.slice(-20);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      removeTypingIndicator();
+      addMessage(currentLanguage === 'zh' ? `抱歉，服务出现错误：${error.message}` : `Sorry, an error occurred: ${error.message}`, "bot");
+    }
+    isTyping = false;
+  }
+}
+function addMessage(text, sender) {
+  const messages = document.getElementById("chat-messages");
+  const messageDiv = document.createElement("div");
+  messageDiv.className = `message ${sender}`;
+  messageDiv.innerHTML = `
+    <div class="message-content">
+      ${text}
+    </div>
+  `;
+  messages.appendChild(messageDiv);
+  messages.scrollTop = messages.scrollHeight;
+}
+function showTypingIndicator() {
+  const messages = document.getElementById("chat-messages");
+  const typingDiv = document.createElement("div");
+  typingDiv.className = "message bot";
+  typingDiv.id = "typing-indicator";
+  typingDiv.innerHTML = `
+    <div class="typing-indicator">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+  `;
+  messages.appendChild(typingDiv);
+  messages.scrollTop = messages.scrollHeight;
+}
+function removeTypingIndicator() {
+  const indicator = document.getElementById("typing-indicator");
+  if (indicator) {
+    indicator.remove();
+  }
+}
+function changeLanguage() {
+  currentLanguage = document.getElementById('language-select').value;
+  localStorage.setItem('language', currentLanguage);
+  updateUILanguage();
+}
+function updateUILanguage() {
+  const t = translations[currentLanguage];
+  document.getElementById('main-title').textContent = t.title;
+  document.getElementById('subtitle').textContent = t.subtitle;
+  document.getElementById('welcome-message').textContent = t.welcome;
+  document.getElementById('settings-title').textContent = t.settings;
+  document.getElementById('language-label').textContent = t.languageSelect;
+  document.getElementById('model-label').textContent = t.modelSelect;
+  document.getElementById('user-input').placeholder = t.inputPlaceholder;
+  document.getElementById('send-button').textContent = t.sendButton;
+  document.getElementById('save-button').textContent = t.saveButton;
+  document.getElementById('clear-history-button').textContent = t.clearHistory;
+  document.getElementById('settings-text').textContent = t.settingsBtn;
+  const footerLinks = document.querySelectorAll('.footer a');
+  footerLinks[1].textContent = t.footer.howItWorks;
+}
+let conversationHistory = [];
+let lastMessageTime = 0;
+function clearHistory() {
+  conversationHistory = [];
+  const messages = document.getElementById("chat-messages");
+  messages.innerHTML = `
+    <div class="message bot">
+      <div class="message-content" id="welcome-message">
+        ${translations[currentLanguage].welcome}
+      </div>
+    </div>
+  `;
+}
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('language-select').value = currentLanguage;
+  updateUILanguage();
+});</script>
+</html>
